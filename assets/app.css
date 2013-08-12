@@ -1,0 +1,72 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+.wrapper{
+    width: 1200px;
+    margin: 0 auto;
+}
+.file-upload textarea{
+    width: 350px;
+    height: 140px;
+}
+.file-upload label{
+    display: block;
+    vertical-align: top;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.file-upload fieldset{
+    width: 350px;
+}
+.file-upload input[type=file]{
+    line-height: 1;
+}
+.file-upload .btn-right{
+    float: right;
+}
+ul.images{
+    margin: 0;
+    padding: 15px;
+    list-style: none;
+    border: 1px solid #ccc;
+}
+ul.images li{
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 30px;
+}
+ul.images li a:hover{
+    -webkit-box-shadow:  0px 0px 6px 4px rgba(170, 170, 170, 0.6);
+    box-shadow:  0px 0px 6px 4px rgba(170, 170, 170, 0.6);
+}
+ul.images li a{
+    display: block;
+}
+.item-image{
+    float: left;
+    margin-right: 30px;
+}
+.comments {
+    float: left;
+    width: 500px;
+}
+.comments textarea{
+    width: 400px;
+    height: 85px;
+}
+.comments table td{
+    vertical-align: top;
+}
+.clearfix:before, .clearfix:after {
+    content: "";
+    display: table
+}
+
+.clearfix:after {
+    clear: both
+}
+
+.clearfix {
+    zoom: 1
+}

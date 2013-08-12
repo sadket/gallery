@@ -1,0 +1,13 @@
+{
+    "name": "gallery",
+    "description": "test gallery",
+    "dependencies": {
+        "express" : "*",
+        "mongoose" : "*",
+        "q" : "*"
+    },
+    "engines": {
+        "node": ">=0.8"
+    }
+
+}

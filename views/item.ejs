@@ -1,0 +1,37 @@
+<% include head %>
+<div class="item clearfix">
+    <div class="item-image">
+        <img src="<%= item.path%>">
+    </div>
+    <p><%= item.description%><p>
+</div>
+<div class="comments">
+    <h2>Add a comment</h2>
+    <form action="/list/" method="POST">
+        <label><input type="text" name="author" placeholder="Your name"></label>
+        </label><textarea name="text" placeholder="Your comment"></textarea></label>
+        <label><input type="submit" value="Send" class="btn btn-primary"></label>
+        <input type="hidden" value="<%= item._id%>" name="image_id">
+    </form>
+    <% if(comments.length > 0 ){%>
+    <h3>Comments</h3>
+        <% for(var i = 0; i < comments.length; i++ ) { %>
+            <div class="comment">
+                <table>
+                    <tr>
+                        <td><%= i+1 %>.
+                        <td>Author: </td>
+                        <td><span class="comment-author"><%= comments[i].author %></span></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>Comment: </td>
+                        <td><p><%= comments[i].text %></p></td>
+                    </tr>
+                </table>
+                <hr>
+        </div>
+        <% } %>
+    <% } %>
+</div>
+<% include footer %>
