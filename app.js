@@ -57,39 +57,43 @@ app.post('/', function(req, res) {
         imagePath = req.files.image.path,
         desc = req.body.description;
 
-    Q.fcall(fileStore())
+    fileStore()
         .then(thumbStore)
         .then(saveImage)
         .catch(function (error) {
+            //res.send(error);
         })
         .done();
 
-
-
     function fileStore(){
-        var defered = Q.defer();
+        var deferred = Q.defer();
         fs.rename(imagePath, newPath, function (err) {
             if(err){
-                defered.reject(new Error(err));
+                deferred.reject(new Error(err));
+            }else{
+                console.log('saved');
+                deferred.resolve();
             }
-            defered.resolve();
         });
-        return defered.promise;
+        return deferred.promise;
     }
 
     function thumbStore(){
-        var defered = Q.defer();
+        var deferred = Q.defer();
+        console.log('resize start');
         im.resize({
             srcPath: newPath,
             dstPath: thumbPath,
             width:   256
         }, function(err, stdout, stderr){
             if (err){
-                defered.reject(new Error(err));
+                deferred.reject(new Error(err));
+            }else{
+                console.log('resize stop');
+                deferred.resolve();
             }
-            defered.resolve();
         });
-        return defered.promise;
+        return deferred.promise;
     }
     function saveImage(){
         var image = new ImageModel({
@@ -118,8 +122,9 @@ app.get("/list/:id", function(req, res){
         ImageModel.findById(imageId, function(err, image){
             if(err){
                 deferred.reject(new Error(err));
+            }else{
+                deferred.resolve(image);
             }
-            deferred.resolve(image);
         });
         return deferred.promise;
     }
