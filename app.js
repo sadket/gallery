@@ -9,7 +9,6 @@ var app = express();
 
 var db = mongoose.connect('mongodb://localhost/gallery');
 
-
 app.use(express.bodyParser({ keepExtensions: true, uploadDir: __dirname + '/images' }));
 app.use('/assets',express.static(__dirname + '/assets'));
 app.use('/images',express.static(__dirname + '/images'));
@@ -30,26 +29,111 @@ var ImageModel = mongoose.model( 'Image', Image );
 var CommentModel = mongoose.model('Comment', Comment);
 
 app.get('/', function(req, res){
-    console.log("GET retrieved");
     try{
         getList(res);
     }catch (e){
         console.log(e);
     }
+
+    function getList(res){
+        return ImageModel.find( function( err, images ) {
+            if( err ) throw err;
+            var imagesObj = images.length > 0 ? images : {};
+            res.render('index.ejs', {
+                layout : false,
+                images : images
+            });
+        });
+    }
 });
 
 app.post('/', function(req, res) {
-    try{
-        storeFile(req, res);
-    }catch (e){
-        console.log(e);
+
+    var image = req.body.image,
+        imageName = req.files.image.name,
+        folder = __dirname + '/images/',
+        thumbPath = folder + 'thumbs/' + imageName,
+        newPath = folder + imageName,
+        imagePath = req.files.image.path,
+        desc = req.body.description;
+
+    Q.fcall(fileStore())
+        .then(thumbStore)
+        .then(saveImage)
+        .catch(function (error) {
+        })
+        .done();
+
+
+
+    function fileStore(){
+        var defered = Q.defer();
+        fs.rename(imagePath, newPath, function (err) {
+            if(err){
+                defered.reject(new Error(err));
+            }
+            defered.resolve();
+        });
+        return defered.promise;
+    }
+
+    function thumbStore(){
+        var defered = Q.defer();
+        im.resize({
+            srcPath: newPath,
+            dstPath: thumbPath,
+            width:   256
+        }, function(err, stdout, stderr){
+            if (err){
+                defered.reject(new Error(err));
+            }
+            defered.resolve();
+        });
+        return defered.promise;
+    }
+    function saveImage(){
+        var image = new ImageModel({
+            path: '/images/' + imageName,
+            thumb: '/images/thumbs/' + imageName,
+            description : desc
+        });
+        image.save( function( err ) {
+            if( err ) {
+                throw err;
+            }
+            res.redirect("/");
+        });
     }
 
 });
 
 app.get("/list/:id", function(req, res){
+    var imageId = req.params.id;
 
-    getImage(req, res);
+    getImage(req, res).then(getComments);
+
+
+    function getImage(req, res){
+        var deferred = Q.defer();
+        ImageModel.findById(imageId, function(err, image){
+            if(err){
+                deferred.reject(new Error(err));
+            }
+            deferred.resolve(image);
+        });
+        return deferred.promise;
+    }
+
+    function getComments(image){
+        CommentModel.find({_imageId : imageId}).exec(function(err, comments){
+            if(err) throw err;
+            var commentsObj = comments.length > 0 ? comments : {};
+            res.render('item.ejs',{
+                item : image,
+                comments : commentsObj
+            });
+        });
+    }
 });
 
 app.post("/list/", function(req, res){
@@ -66,82 +150,6 @@ app.post("/list/", function(req, res){
         }
     })
 });
-
-function getList(res){
-    return ImageModel.find( function( err, images ) {
-        if( err ) throw err;
-        var imagesObj = images.length > 0 ? images : {};
-        res.render('index.ejs', {
-            layout : false,
-            images : images
-        });
-    });
-}
-
-function storeFile(req, res){
-    var image = req.body.image,
-        folder = __dirname + '/images/',
-        thumbPath = folder + 'thumbs/' + req.files.image.name,
-        newPath = folder + req.files.image.name;
-    fs.rename(req.files.image.path, newPath, function (err) {
-        if (err) throw err;
-        im.resize({
-            srcPath: newPath,
-            dstPath: thumbPath,
-            width:   256
-        }, function(err, stdout, stderr){
-            if (err) throw err;
-            try {
-                saveImage(req, res);
-            } catch (e){
-                console.log(e);
-            }
-        });
-    });
-}
-
-function saveImage(req, res){
-    var image = new ImageModel({
-        path: '/images/' + req.files.image.name,
-        thumb: '/images/thumbs/' + req.files.image.name,
-        description : req.body.description
-    });
-    image.save( function( err ) {
-        if( !err ) {
-            try{
-                return getList(res);
-            }catch (e){
-                console.log(e);
-            }
-        } else {
-            throw err;
-        }
-    });
-}
-function getImage(req, res){
-    var deferred = Q.defer();
-    ImageModel.findById(req.params.id).exec(function(err, image){
-        if(err){
-            deferred.reject(new Error(err));
-        } else {
-            deferred.resolve(image);
-            getComments(req, res, image);
-        }
-    });
-    return deferred.promise;
-}
-
-function getComments(req, res, image){
-    CommentModel.find({_imageId : req.params.id}).exec(function(err, comments){
-        if(err) throw err;
-        var commentsObj = comments.length > 0 ? comments : {};
-        res.render('item.ejs',{
-            item : image,
-            comments : commentsObj
-        });
-    });
-}
-
 
 
 

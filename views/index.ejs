@@ -11,12 +11,14 @@
 </div>
 <%if (images.length > 0){%>
 <h2>Image gallery</h1>
-<ul class="images">
-    <% for(var i=0; i<images.length; i++) {%>
-       <li><a href="/list/<%= images[i]._id %>"><img src="<%= images[i].thumb%>"></a></li>
-    <% } %>
+<div class="gallery-container">
+    <ul class="images">
+        <% for(var i=0; i<images.length; i++) {%>
+           <li><a href="/list/<%= images[i]._id %>"><img src="<%= images[i].thumb%>"></a></li>
+        <% } %>
 
-</ul>
+    </ul>
+</div>
 <%}%>
 
 <% include footer %>
